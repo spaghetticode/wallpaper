@@ -1,0 +1,21 @@
+<html>
+<head>
+  <script src="jquery.js"></script>
+  <script src="../wallpaper.js"></script>
+  <link rel="stylesheet" href="../wallpaper.css" type="text/css" />
+  <script type="text/javascript">
+    $(function() {
+      // assing wallpaper as a window property, so you can explore it
+      // if you want:
+      window.wallpaper = $('#wallpaper').wallpaper({speed: 750});
+    })
+  </script>
+  <title></title>
+</head>
+<body>
+  <div id="wallpaper">
+    <img src="img0.jpg" />
+    <img src="img1.jpg" id="last" />
+  </div>
+</body>
+</html>

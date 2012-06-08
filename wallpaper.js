@@ -1,48 +1,129 @@
-  (function($) {
+    (function($) {
       $.fn.wallpaper = function(opts) {
-        img    = this;
-        win    = $(window);
-        body   = $('body');
-        speed  = opts.speed || 250;
+        var win   = $(window),
+            body  = $('body'),
+            wallpaper = this;
 
-        loadImage = function() {
-          img.load(function() {
-            resize();
-            img.fadeIn(speed);
-            $(window).bind('resize.wallpaper', resizeHandler.bind(img));
-          });
-          if (img.css('display') === 'none') {
-            img.fadeIn(speed);
-          }
+        // defining the Wallpaper object which will be returned by this plugin:
+        var Wallpaper = {
+          uri:     opts.uri,
+          element: wallpaper,
+          speed:   opts.speed || 500
         };
 
-        resize = function() {
-          winWidth  = win.width();
-          winHeight = win.height();
-          imageAspectRatio  = img.width() / img.height();
-          windowAspectRatio = winWidth / winHeight;
-          if (windowAspectRatio < imageAspectRatio) {
-            css = {width: 'auto', height: winHeight};
+        Wallpaper.init = function() {
+          this.setCssProperties();
+          this.buildImgs();
+          this.initImg();
+          this.initWinResize();
+          return this;
+        };
+
+        Wallpaper.initWinResize = function () {
+          win.bind('resize.wallpaper', Wallpaper.resize);
+        };
+
+        Wallpaper.resize = function() {
+          var img            = Wallpaper.currentImg,
+              winWidth       = win.width();
+              winHeight      = win.height();
+              imgAspectRatio = img.width() / img.height();
+              winAspectRatio = winWidth / winHeight;
+
+          if (winAspectRatio < imgAspectRatio) {
+            img.css({width: 'auto', height: winHeight});
           } else {
-            css = {width: winWidth, height: 'auto'};
+            img.css({width: winWidth, height: 'auto'});
           }
-          body.css(css);
-          img.css(css);
         };
 
-        resizeHandler = function() {
-          resize();
-        };
-
-        loadImage();
-
-        this.change = function(url) {
-          img.fadeOut(speed, function() {
-            img.attr('src', url);
-            loadImage();
+        Wallpaper.setCssProperties = function() {
+          body.css({
+            overflow: 'hidden',
+            margin:   0,
+            padding:  0
           });
-        }
+          this.element.css({
+            display: 'block',
+            position: 'relative',
+            width:   '100%',
+            height:  '100%'
+          });
+        };
 
-        return this;
+        Wallpaper.buildImgs = function() {
+          this.imgs = [];
+          this.element.find('img').each(function() {
+            Wallpaper.imgs.push($(this));
+          });
+        };
+
+        Wallpaper.findImage = function(uri) {
+          var img;
+
+          $.each(this.imgs, function(){
+            if (this.attr('src') === uri) {
+              img = this;
+            }
+          });
+          if (!img) {
+            img = $(new Image());
+            img.attr('src', uri);
+            this.imgs.push(img);
+            this.preload(img);
+          }
+          return img;
+        };
+
+        Wallpaper.initImg = function() {
+          var img;
+
+          if (this.uri) {
+            img = this.findImg(this.uri);
+          } else {
+            img = this.imgs[0];
+          }
+          this.currentImg = img;
+          this.preload(img, function() {
+            img.fadeIn(Wallpaper.speed);
+          });
+        };
+
+        Wallpaper.change = function(args) {
+          var img;
+
+          if (args.src) {
+            img = this.findImage(args.src);
+          } else {
+            img = $(args);
+          }
+          console.log(img)
+          if (img.length) {
+            if (this.currentImg !== img) {
+              this.currentImg = img;
+              img.detach().hide();
+              this.element.append(img);
+              win.resize();
+              img.fadeIn(Wallpaper.speed);
+              return true;
+            }
+          }
+        };
+
+        Wallpaper.preload = function(img, callback) {
+          var src = img.src;
+
+          img.src = '';
+          img.load(function() {
+            console.log('preloading');
+            if (callback) {
+              callback.call();
+              Wallpaper.resize();
+            }
+          });
+          img.src = src;
+        };
+
+        return Wallpaper.init(opts);
       };
     })(jQuery);
