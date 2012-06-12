@@ -26,7 +26,7 @@ You can also change the wallpaper image using the following code in your
 browser console:
 
 ```javascript
-  wallpaper.change('#img1.jpg');
+  wallpaper.change('#img1');
 ```
 
 ```javascript
