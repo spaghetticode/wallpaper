@@ -97,7 +97,6 @@
           } else {
             img = $(args);
           }
-          console.log(img)
           if (img.length) {
             if (this.currentImg !== img) {
               this.currentImg = img;
@@ -115,7 +114,6 @@
 
           img.src = '';
           img.load(function() {
-            console.log('preloading');
             if (callback) {
               callback.call();
               Wallpaper.resize();
