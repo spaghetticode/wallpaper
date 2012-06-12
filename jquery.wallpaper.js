@@ -98,7 +98,7 @@
             img = $(args);
           }
           if (img.length) {
-            if (this.currentImg !== img) {
+            if (this.currentImg.attr('src') !== img.attr('src')) {
               this.currentImg = img;
               img.detach().hide();
               this.element.append(img);
